@@ -1,23 +1,27 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  SqsApiGatewayIntegration
+  Cron
 
-  Sample SAM Template for SqsApiGatewayIntegration
 Globals:
   Function:
     Timeout: 3
 
 Resources:
-  Function:
+  LogFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
-      Handler: app.lambdaHandler
+      Handler: app.handler
       Runtime: nodejs18.x
-      Architectures:
-      - x86_64
+      Policies:
+        - AWSLambdaBasicExecutionRole
 
-  Api:
-    Type: AWS::Serverless::Api
+  LogWritingRule:
+    Type: AWS::Events::Rule
     Properties:
+      ScheduleExpression: rate(1 minute)
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt LogFunction.Arn
+          Id: 5MinutesLog
